@@ -2,6 +2,7 @@ import { posts, getPost } from '@/content/insights';
 import { renderOgImage, OG_SIZE, OG_CONTENT_TYPE } from '@/lib/og';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-static';
 export const alt = 'CyberXSolutions field notes';
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;

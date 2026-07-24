@@ -3,6 +3,9 @@ import { site, allRoutes } from '@/content/site';
 import { posts } from '@/content/insights';
 import { caseStudies } from '@/content/caseStudies';
 
+// Emitted as a static file so the site can also ship as a pure static export.
+export const dynamic = 'force-static';
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
 

@@ -32,6 +32,12 @@ const budgets = [
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
+/**
+ * The bundled Node endpoint by default. A static export has no API routes, so
+ * set NEXT_PUBLIC_CONTACT_ENDPOINT to an external form handler in that mode.
+ */
+const ENDPOINT = process.env.NEXT_PUBLIC_CONTACT_ENDPOINT || '/api/contact';
+
 function Field({
   id,
   label,
@@ -110,9 +116,9 @@ export function ContactForm() {
     setStatus('submitting');
 
     try {
-      const response = await fetch('/api/contact', {
+      const response = await fetch(ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(data),
       });
 
@@ -122,7 +128,9 @@ export function ContactForm() {
         errors?: Errors;
       };
 
-      if (response.ok && result.ok) {
+      // Our own endpoint returns { ok: true }; third-party handlers such as
+      // Formspree or Web3Forms just return 2xx.
+      if (response.ok && (result.ok ?? true)) {
         setStatus('success');
         form.reset();
         return;

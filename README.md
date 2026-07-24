@@ -171,15 +171,46 @@ See `.env.example`.
 
 ## Deployment
 
-Any platform that runs Next.js works. Vercel is the shortest path:
+The site builds two ways. Pick by where it will run.
 
-1. Import the repository.
-2. Set `CONTACT_WEBHOOK_URL`.
-3. Deploy — everything except `/api/contact` prerenders as static HTML.
+### Node build — Vercel, a VPS, anything running Node
 
-For a self-hosted target, `npm run build && npm start` behind a reverse proxy is sufficient.
-Set `site.url` in `src/content/site.ts` if the production domain ever changes; canonical URLs,
-the sitemap and JSON-LD all derive from it.
+```bash
+npm run build && npm start
+```
+
+Keeps `/api/contact`. Set `CONTACT_WEBHOOK_URL` and the form works out of the box.
+Security headers come from `next.config.mjs`.
+
+### Static export — Hostinger shared/Premium/Business, or any Apache docroot
+
+```bash
+BUILD_TARGET=static npm run build:static     # writes ./out
+```
+
+Produces 40 HTML pages plus assets, ~19 MB, with **no Node required at runtime**.
+Upload the *contents* of `out/` into `public_html/`.
+
+`public/.htaccess` ships with the export and handles HTTPS redirect, canonical host,
+security headers, caching, compression, the 404 document, and the MIME type for the
+extensionless generated social cards. Apache will not serve those correctly without it, so
+make sure hidden files are included when you upload.
+
+A static export has no API routes, so `/api/contact` is dropped. Point the form at an
+external handler instead:
+
+```
+NEXT_PUBLIC_CONTACT_ENDPOINT=https://formspree.io/f/xxxxxxxx
+```
+
+The form posts JSON and accepts any 2xx as success, so Formspree, Web3Forms, Basin or your
+own endpoint all work unchanged.
+
+### Domain
+
+Set `site.url` in `src/content/site.ts` if the production domain differs from
+`https://cyberxsolutions.us`. Canonical URLs, the sitemap, JSON-LD and social card URLs all
+derive from it — changing it in one place updates every one.
 
 ---
 
