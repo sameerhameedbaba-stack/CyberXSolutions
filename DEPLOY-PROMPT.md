@@ -64,22 +64,14 @@ Then open the "Variables" tab on the same page and add:
 | --- | --- |
 | `FTP_SERVER_DIR` | `public_html/` |
 
-## Step 5 — Merge the branch to main
+## Step 5 — Trigger and watch the deploy
 
-Go to `https://github.com/sameerhameedbaba-stack/cyberxsolutions`.
+`main` already exists and the workflow has already run once — it will have failed at the
+final upload step, because the FTP secrets did not exist yet. That is expected.
 
-There is currently only one branch and no `main`. Open
-`https://github.com/sameerhameedbaba-stack/cyberxsolutions/branches`, and either:
-- rename `claude/cyberxsolutions-enterprise-site-ozu7he` to `main`, or
-- create `main` from it and set `main` as the default branch under Settings → General.
-
-Tell me which you did.
-
-## Step 6 — Watch the deploy
-
-Merging to `main` triggers the "Deploy to Hostinger" workflow automatically. Open
-`https://github.com/sameerhameedbaba-stack/cyberxsolutions/actions`, open the running job,
-and report:
+Go to `https://github.com/sameerhameedbaba-stack/cyberxsolutions/actions`, open
+"Deploy to Hostinger", and click **Re-run all jobs**. Now that the secrets are set it should
+complete. Report:
 - whether each step passes (install, typecheck, lint, build, verify, upload)
 - the line that reads "Exported N pages" — N should be 40
 - any error output, in full, if it fails
@@ -88,7 +80,7 @@ If the FTP step fails, the usual causes are: wrong hostname, the FTP account's h
 directory not being `public_html`, or the plan blocking FTPS. Tell me the exact error rather
 than trying alternatives.
 
-## Step 7 — Verify the live site
+## Step 6 — Verify the live site
 
 Once the workflow is green, open these and confirm each loads correctly over **https**:
 
