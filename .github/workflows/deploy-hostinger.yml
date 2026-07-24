@@ -10,7 +10,13 @@ name: Deploy to Hostinger
 # Optional repository variables (same page, "Variables" tab):
 #   CONTACT_ENDPOINT        external form handler URL; without it the contact
 #                           form reports that it is not configured
-#   FTP_SERVER_DIR          defaults to public_html/
+#   FTP_SERVER_DIR          Remote path RELATIVE TO THE FTP ACCOUNT'S HOME.
+#                           Hostinger's main FTP account is already rooted at
+#                           public_html, so the default './' is correct there.
+#                           Only set this if your FTP user lands somewhere else
+#                           — pointing it at 'public_html/' when the account is
+#                           already inside public_html deploys to
+#                           public_html/public_html/ and the site appears dead.
 
 on:
   push:
@@ -62,9 +68,11 @@ jobs:
           server: ${{ secrets.HOSTINGER_FTP_HOST }}
           username: ${{ secrets.HOSTINGER_FTP_USER }}
           password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          # Explicit FTPS (AUTH TLS) over the standard control port.
           protocol: ftps
+          port: 21
           local-dir: ./out/
-          server-dir: ${{ vars.FTP_SERVER_DIR || 'public_html/' }}
+          server-dir: ${{ vars.FTP_SERVER_DIR || './' }}
           # Keep anything Hostinger puts there itself.
           exclude: |
             **/.git*

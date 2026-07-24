@@ -73,7 +73,12 @@ Then open the "Variables" tab on the same page and add:
 
 | Name | Value |
 | --- | --- |
-| `FTP_SERVER_DIR` | `public_html/` |
+| `FTP_SERVER_DIR` | `./` |
+
+`./` is deliberate, not a typo. Hostinger's main FTP account is already rooted at
+`public_html`, so the upload lands there on connect. Setting this to `public_html/` would
+deploy into `public_html/public_html/` and the site would appear dead with a green
+workflow.
 
 ## Step 5 — Trigger and watch the deploy
 
