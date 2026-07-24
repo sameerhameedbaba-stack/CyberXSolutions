@@ -1,0 +1,74 @@
+name: Deploy to Hostinger
+
+# Builds the static export and uploads it to Hostinger over FTPS.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   HOSTINGER_FTP_HOST      e.g. ftp.cyberxsolutions.us
+#   HOSTINGER_FTP_USER      the FTP account username from hPanel
+#   HOSTINGER_FTP_PASSWORD  that account's password
+#
+# Optional repository variables (same page, "Variables" tab):
+#   CONTACT_ENDPOINT        external form handler URL; without it the contact
+#                           form reports that it is not configured
+#   FTP_SERVER_DIR          defaults to public_html/
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck and lint
+        run: |
+          npm run typecheck
+          npm run lint
+
+      - name: Build static export
+        env:
+          NEXT_PUBLIC_CONTACT_ENDPOINT: ${{ vars.CONTACT_ENDPOINT }}
+        run: npm run build:static
+
+      - name: Verify the export looks sane
+        run: |
+          test -f out/index.html || { echo "::error::out/index.html missing"; exit 1; }
+          test -f out/.htaccess || { echo "::error::out/.htaccess missing — Apache config would not ship"; exit 1; }
+          test -f out/sitemap.xml || { echo "::error::sitemap missing"; exit 1; }
+          pages=$(find out -name index.html | wc -l)
+          echo "Exported $pages pages, $(du -sh out | cut -f1) total"
+          [ "$pages" -ge 30 ] || { echo "::error::only $pages pages exported, expected 30+"; exit 1; }
+
+      - name: Upload to Hostinger
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.HOSTINGER_FTP_HOST }}
+          username: ${{ secrets.HOSTINGER_FTP_USER }}
+          password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./out/
+          server-dir: ${{ vars.FTP_SERVER_DIR || 'public_html/' }}
+          # Keep anything Hostinger puts there itself.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/default.php
+            **/cgi-bin/**
