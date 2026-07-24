@@ -35,6 +35,17 @@ In hPanel:
   Tell me the status. Do not enable "Force HTTPS" in hPanel — the site ships its own
   `.htaccess` that handles the redirect, and having both can cause a redirect loop.
 
+## Step 2b — Clear the Hostinger placeholder
+
+hPanel → Files → File Manager → `public_html`.
+
+Hostinger provisions this folder with a placeholder (usually `default.php`, sometimes an
+`index.php` or a "coming soon" page). **Delete everything already in `public_html`** so the
+deploy lands in a clean directory. The site ships its own `.htaccess`, so nothing in there
+needs preserving.
+
+Tell me what you found and deleted before continuing.
+
 ## Step 3 — Create an FTP account
 
 hPanel → Files → FTP Accounts. Create one (or use the existing one) with its home directory
@@ -78,7 +89,8 @@ complete. Report:
 
 If the FTP step fails, the usual causes are: wrong hostname, the FTP account's home
 directory not being `public_html`, or the plan blocking FTPS. Tell me the exact error rather
-than trying alternatives.
+than trying alternatives — this hosting account has SSH enabled, so there is a good fallback
+if FTP proves unreliable.
 
 ## Step 6 — Verify the live site
 

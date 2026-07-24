@@ -3,6 +3,12 @@
 # natively. These rules add the security headers, caching and HTTPS redirect
 # that next.config.mjs applies when Node is serving the site instead.
 
+# ---------- Index priority ----------
+# Hostinger provisions public_html with a default.php placeholder, and Apache's
+# default DirectoryIndex prefers .php over .html — which would serve the
+# placeholder instead of the site. Pin the order explicitly.
+DirectoryIndex index.html index.htm
+
 # ---------- Force HTTPS + canonical host ----------
 <IfModule mod_rewrite.c>
   RewriteEngine On
