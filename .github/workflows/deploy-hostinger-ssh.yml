@@ -1,0 +1,100 @@
+name: Deploy to Hostinger (SSH)
+
+# Fallback for when FTPS will not negotiate — most likely cause being the FTP
+# host presenting a TLS certificate that does not match a bare IP address.
+# rsync over SSH is faster, uses key authentication instead of a password, and
+# removes stale files on redeploy.
+#
+# Manual trigger only, so it never competes with the FTP workflow.
+#
+# Required secrets:
+#   HOSTINGER_SSH_KEY   private key, PEM format, whole file including header
+#                       and footer lines
+#   HOSTINGER_SSH_HOST  e.g. 185.224.137.200
+#   HOSTINGER_SSH_USER  e.g. u739945294
+#
+# Optional variables:
+#   HOSTINGER_SSH_PORT  defaults to 65002 (Hostinger shared hosting)
+#   SSH_TARGET_DIR      defaults to public_html
+#   CONTACT_ENDPOINT    external form handler URL
+#
+# Add the matching public key in hPanel → Advanced → SSH Access → SSH keys.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck and lint
+        run: |
+          npm run typecheck
+          npm run lint
+
+      - name: Build static export
+        env:
+          NEXT_PUBLIC_CONTACT_ENDPOINT: ${{ vars.CONTACT_ENDPOINT }}
+        run: npm run build:static
+
+      - name: Verify the export looks sane
+        run: |
+          test -f out/index.html || { echo "::error::out/index.html missing"; exit 1; }
+          test -f out/.htaccess || { echo "::error::out/.htaccess missing — Apache config would not ship"; exit 1; }
+          test -f out/sitemap.xml || { echo "::error::sitemap missing"; exit 1; }
+          pages=$(find out -name index.html | wc -l)
+          echo "Exported $pages pages, $(du -sh out | cut -f1) total"
+          [ "$pages" -ge 30 ] || { echo "::error::only $pages pages exported, expected 30+"; exit 1; }
+
+      - name: Deploy over SSH
+        env:
+          SSH_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+          SSH_HOST: ${{ secrets.HOSTINGER_SSH_HOST }}
+          SSH_USER: ${{ secrets.HOSTINGER_SSH_USER }}
+          SSH_PORT: ${{ vars.HOSTINGER_SSH_PORT || '65002' }}
+          TARGET_DIR: ${{ vars.SSH_TARGET_DIR || 'public_html' }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          # Pin the host key rather than disabling verification.
+          ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          test -s ~/.ssh/known_hosts || { echo "::error::could not reach $SSH_HOST:$SSH_PORT"; exit 1; }
+
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -p $SSH_PORT -o StrictHostKeyChecking=yes"
+
+          # Confirm the target exists before syncing, so a wrong path fails loudly
+          # instead of rsync helpfully creating it in the wrong place.
+          $SSH_CMD "$SSH_USER@$SSH_HOST" "test -d $TARGET_DIR" \
+            || { echo "::error::$TARGET_DIR does not exist on the server"; exit 1; }
+
+          # Trailing slash on ./out/ syncs the contents, including dotfiles, so
+          # .htaccess ships. --delete clears pages removed since the last deploy.
+          rsync -az --delete --stats \
+            -e "$SSH_CMD" \
+            ./out/ "$SSH_USER@$SSH_HOST:$TARGET_DIR/"
+
+          echo "Deployed to $SSH_USER@$SSH_HOST:$TARGET_DIR/"
+
+      - name: Clean up the key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
