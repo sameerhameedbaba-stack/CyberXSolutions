@@ -1,0 +1,517 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   CyberXSolutions Design System
+   Bright, premium, technology-first. White canvas, aurora light, glass depth.
+   ========================================================================== */
+
+@layer base {
+  :root {
+    --font-display: 'Plus Jakarta Sans Fallback', sans-serif;
+    --font-body: 'Inter Fallback', sans-serif;
+    --font-mono: ui-monospace, monospace;
+
+    /* Brand spectrum */
+    --c-blue: 47 107 255;
+    --c-indigo: 79 70 229;
+    --c-violet: 124 58 237;
+    --c-cyan: 6 182 212;
+    --c-emerald: 16 185 129;
+    --c-orange: 249 115 22;
+    --c-pink: 236 72 153;
+
+    /* Surfaces */
+    --surface: 255 255 255;
+    --surface-muted: 248 249 252;
+    --border-soft: 20 26 49 / 0.08;
+
+    --header-h: 4.5rem;
+  }
+
+  * {
+    border-color: rgb(var(--border-soft));
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* Anchored sections clear the sticky header. */
+    scroll-padding-top: calc(var(--header-h) + 1.5rem);
+  }
+
+  body {
+    @apply bg-white text-ink-700 font-sans antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display text-ink-950;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* A single, unmistakable focus treatment across the whole site. */
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-blue));
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: rgb(var(--c-blue) / 0.16);
+    color: #080C1B;
+  }
+
+  /* Respect the user's motion preference — every animation degrades to static. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* ---------- Layout ---------- */
+  .container-x {
+    @apply mx-auto w-full max-w-container px-5 sm:px-8 lg:px-10;
+  }
+
+  .container-narrow {
+    @apply mx-auto w-full max-w-4xl px-5 sm:px-8;
+  }
+
+  /* ---------- Type helpers ---------- */
+  .text-gradient {
+    @apply bg-brand-gradient bg-clip-text text-transparent;
+    background-size: 220% 220%;
+  }
+
+  .text-gradient-cool {
+    @apply bg-brand-gradient-cool bg-clip-text text-transparent;
+  }
+
+  .text-gradient-fresh {
+    @apply bg-brand-gradient-fresh bg-clip-text text-transparent;
+  }
+
+  .text-gradient-warm {
+    @apply bg-brand-gradient-warm bg-clip-text text-transparent;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 font-mono text-eyebrow uppercase text-brand-600;
+  }
+
+  /* ---------- Glass & surfaces ---------- */
+  .glass {
+    background: linear-gradient(150deg, rgb(255 255 255 / 0.86), rgb(255 255 255 / 0.62));
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgb(255 255 255 / 0.7);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.85),
+      0 2px 6px -2px rgb(20 26 49 / 0.06),
+      0 18px 44px -18px rgb(20 26 49 / 0.18);
+  }
+
+  .glass-strong {
+    background: linear-gradient(150deg, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.8));
+    backdrop-filter: blur(26px) saturate(180%);
+    -webkit-backdrop-filter: blur(26px) saturate(180%);
+    border: 1px solid rgb(255 255 255 / 0.85);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.9),
+      0 4px 10px -4px rgb(20 26 49 / 0.07),
+      0 30px 70px -28px rgb(20 26 49 / 0.24);
+  }
+
+  /* Navigation panels sit directly over hero content, so they keep the blur
+     but drop the transparency — anything less and the headline reads through. */
+  .surface-menu {
+    background: rgb(255 255 255 / 0.98);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgb(20 26 49 / 0.07);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.9),
+      0 8px 20px -8px rgb(20 26 49 / 0.10),
+      0 40px 90px -30px rgb(20 26 49 / 0.32);
+  }
+
+  .surface-card {
+    @apply relative rounded-3xl border border-ink-100 bg-white shadow-lift-sm transition-all duration-500 ease-smooth;
+  }
+
+  .surface-card:hover {
+    @apply -translate-y-1 border-ink-200 shadow-lift;
+  }
+
+  /* Gradient hairline border — brand colour without a heavy frame. */
+  .ring-gradient {
+    position: relative;
+  }
+
+  .ring-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(140deg, rgb(var(--c-blue) / 0.55), rgb(var(--c-violet) / 0.4) 45%, rgb(var(--c-cyan) / 0.35));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* ---------- Aurora background system ---------- */
+  .aurora {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .aurora-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(72px);
+    opacity: 0.5;
+    will-change: transform;
+  }
+
+  @media (min-width: 1024px) {
+    .aurora-blob {
+      filter: blur(96px);
+    }
+  }
+
+  /* Fine engineering grid — reads as precision, not decoration. */
+  .grid-overlay {
+    background-image:
+      linear-gradient(to right, rgb(20 26 49 / 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(20 26 49 / 0.045) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 30%, transparent 78%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 30%, transparent 78%);
+  }
+
+  .dot-overlay {
+    background-image: radial-gradient(rgb(20 26 49 / 0.09) 1px, transparent 1px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 20%, transparent 76%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 20%, transparent 76%);
+  }
+
+  /* Subtle film grain stops large gradients from banding. */
+  .noise::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.032;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    @apply relative inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition-all duration-300 ease-smooth;
+  }
+
+  .btn:disabled {
+    @apply pointer-events-none opacity-50;
+  }
+
+  .btn-primary {
+    @apply text-white shadow-glow;
+    background-image: linear-gradient(105deg, #2F6BFF 0%, #5B5BF5 42%, #8B5CF6 72%, #C13FE0 100%);
+    background-size: 200% 200%;
+    background-position: 0% 50%;
+  }
+
+  .btn-primary:hover {
+    background-position: 100% 50%;
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 1px rgb(47 107 255 / 0.16), 0 18px 44px -12px rgb(47 107 255 / 0.55);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  /* Light sweep across the primary button on hover. */
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.28) 50%, transparent 70%);
+    background-size: 250% 100%;
+    background-position: 150% 0;
+    transition: background-position 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+
+  .btn-primary:hover::after {
+    background-position: -60% 0;
+  }
+
+  .btn-secondary {
+    @apply border border-ink-200 bg-white text-ink-900 shadow-lift-sm;
+  }
+
+  .btn-secondary:hover {
+    @apply -translate-y-0.5 border-brand-300 text-brand-700 shadow-lift;
+  }
+
+  .btn-ghost {
+    @apply text-ink-700;
+  }
+
+  .btn-ghost:hover {
+    @apply bg-ink-50 text-ink-950;
+  }
+
+  .btn-sm {
+    @apply h-10 px-5 text-sm;
+  }
+
+  .btn-md {
+    @apply h-12 px-6 text-[0.9375rem];
+  }
+
+  .btn-lg {
+    @apply h-14 px-8 text-base;
+  }
+
+  /* ---------- Links ---------- */
+  .link-arrow {
+    @apply inline-flex items-center gap-1.5 font-semibold text-brand-600 transition-colors duration-300 ease-smooth hover:text-brand-700;
+  }
+
+  .link-arrow svg {
+    @apply transition-transform duration-300 ease-smooth;
+  }
+
+  .link-arrow:hover svg {
+    transform: translateX(4px);
+  }
+
+  /* ---------- Prose (legal & article pages) ---------- */
+  .prose-cx {
+    @apply text-[1.0625rem] leading-[1.75] text-ink-600;
+  }
+
+  .prose-cx h2 {
+    @apply mb-4 mt-14 text-display-sm text-ink-950 first:mt-0;
+  }
+
+  .prose-cx h3 {
+    @apply mb-3 mt-10 text-xl font-bold text-ink-900;
+  }
+
+  .prose-cx p {
+    @apply mb-5;
+  }
+
+  .prose-cx ul {
+    @apply mb-6 space-y-2.5 pl-1;
+  }
+
+  .prose-cx ul li {
+    @apply relative pl-7;
+  }
+
+  .prose-cx ul li::before {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    top: 0.7rem;
+    width: 7px;
+    height: 7px;
+    border-radius: 9999px;
+    background-image: linear-gradient(135deg, #2F6BFF, #8B5CF6);
+  }
+
+  .prose-cx ol {
+    @apply mb-6 list-decimal space-y-2.5 pl-6 marker:font-semibold marker:text-brand-600;
+  }
+
+  .prose-cx a {
+    @apply font-semibold text-brand-600 underline decoration-brand-300 underline-offset-4 transition-colors hover:text-brand-700 hover:decoration-brand-500;
+  }
+
+  .prose-cx strong {
+    @apply font-semibold text-ink-900;
+  }
+
+  /* ---------- Motion primitives ---------- */
+  /* Reveal-on-scroll: starts hidden, .is-in is added by IntersectionObserver. */
+  .reveal {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0);
+    transition:
+      opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+
+  .reveal-left {
+    transform: translate3d(-26px, 0, 0);
+  }
+
+  .reveal-right {
+    transform: translate3d(26px, 0, 0);
+  }
+
+  .reveal-scale {
+    transform: scale(0.94);
+  }
+
+  .reveal.is-in {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Cursor-tracking spotlight for premium cards. */
+  .spotlight {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .spotlight::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    background: radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 50%),
+      rgb(47 107 255 / 0.10),
+      rgb(139 92 246 / 0.06) 40%,
+      transparent 68%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .spotlight:hover::before {
+    opacity: 1;
+  }
+
+  /* 3D scene wrapper. Flat and safe on small screens; tilted on desktop where
+     there is room for perspective. --tx/--ty come from <ParallaxTilt>. */
+  .tilt-panel {
+    transform: rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg));
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  @media (min-width: 1024px) {
+    .tilt-scene {
+      perspective: 1800px;
+    }
+    .tilt-panel {
+      transform: rotateX(calc(3deg + var(--tx, 0deg))) rotateY(calc(-7deg + var(--ty, 0deg)));
+    }
+    .tilt-panel-soft {
+      transform: rotateX(calc(2deg + var(--tx, 0deg))) rotateY(calc(-4deg + var(--ty, 0deg)));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tilt-panel {
+      transform: none;
+    }
+  }
+
+  /* Native select arrows differ per platform; appearance-none plus this keeps
+     the control looking like the rest of the form while still reading as a menu. */
+  .select-chevron {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2367718F' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9.5 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 0.875rem center;
+    background-repeat: no-repeat;
+    background-size: 1rem 1rem;
+  }
+
+  .marquee-mask {
+    mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  .animate-paused {
+    animation-play-state: paused;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-mesh-soft {
+    background-image:
+      radial-gradient(at 12% 8%, rgb(47 107 255 / 0.10) 0px, transparent 55%),
+      radial-gradient(at 88% 4%, rgb(139 92 246 / 0.10) 0px, transparent 52%),
+      radial-gradient(at 74% 92%, rgb(6 182 212 / 0.09) 0px, transparent 50%),
+      radial-gradient(at 6% 88%, rgb(236 72 153 / 0.07) 0px, transparent 48%);
+  }
+
+  .bg-mesh-fresh {
+    background-image:
+      radial-gradient(at 10% 10%, rgb(16 185 129 / 0.10) 0px, transparent 52%),
+      radial-gradient(at 90% 20%, rgb(6 182 212 / 0.10) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgb(47 107 255 / 0.08) 0px, transparent 55%);
+  }
+
+  .bg-mesh-warm {
+    background-image:
+      radial-gradient(at 15% 12%, rgb(249 115 22 / 0.09) 0px, transparent 50%),
+      radial-gradient(at 85% 18%, rgb(236 72 153 / 0.10) 0px, transparent 50%),
+      radial-gradient(at 55% 95%, rgb(124 58 237 / 0.09) 0px, transparent 52%);
+  }
+
+  /* Keeps very light gradient text legible against white. */
+  .drop-shadow-crisp {
+    filter: drop-shadow(0 1px 1px rgb(20 26 49 / 0.06));
+  }
+
+  .sr-only-focusable:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
