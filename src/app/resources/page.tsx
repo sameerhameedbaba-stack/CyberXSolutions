@@ -89,7 +89,7 @@ export default function ResourcesPage() {
                 Take them. <span className="text-gradient">Use them without us.</span>
               </>
             }
-            lead="If one of these answers your question and you never speak to us again, that is a good outcome. It is also, in our experience, the most reliable way to be the firm someone calls next year."
+            lead="Some are published in full on this site; the working documents we send on request, because they are worth a five-minute conversation about your context. Either way there is no email wall and no follow-up sequence."
           />
         </Reveal>
 
@@ -105,12 +105,15 @@ export default function ResourcesPage() {
                     </div>
                     <h3 className="mt-6 text-lg font-bold text-ink-950 group-hover:text-brand-700">{item.title}</h3>
                     <p className="mt-3 flex-1 text-[0.9375rem] leading-relaxed text-ink-500">{item.description}</p>
-                    <p className="mt-6 flex items-center justify-between border-t border-ink-100 pt-5 text-[0.8125rem] font-semibold text-ink-500">
-                      {item.meta}
-                      <Icon
-                        name="arrow-right"
-                        className="h-4 w-4 text-brand-500 transition-transform duration-300 ease-smooth group-hover:translate-x-1"
-                      />
+                    <p className="mt-6 flex items-center justify-between gap-3 border-t border-ink-100 pt-5 text-[0.8125rem] text-ink-500">
+                      <span>{item.meta}</span>
+                      <span className="inline-flex shrink-0 items-center gap-1.5 font-semibold text-brand-600">
+                        {item.action}
+                        <Icon
+                          name="arrow-right"
+                          className="h-4 w-4 transition-transform duration-300 ease-smooth group-hover:translate-x-1"
+                        />
+                      </span>
                     </p>
                   </div>
                 </SpotlightCard>
@@ -166,9 +169,9 @@ export default function ResourcesPage() {
       <FAQSection
         faqs={[
           {
-            question: 'Why are none of these gated?',
+            question: 'Why are none of these behind an email wall?',
             answer:
-              'Because a framework behind an email wall gets downloaded and never opened. We would rather it get used. If it helps you solve the problem without us, that is a fine outcome — and it is reliably how we end up being the firm someone calls the following year.',
+              'Because a framework behind a form gets downloaded and never opened. We would rather it get used. Several are published in full on this site; the working documents — the assessment sheet and the payback model — we send on request, because they are genuinely more useful with five minutes of context about your situation. Asking does not put you on a list.',
           },
           {
             question: 'Can we use these commercially?',

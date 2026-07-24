@@ -313,29 +313,44 @@ export const cookiePolicy: LegalDoc = {
     },
     {
       heading: 'Cookies we use',
+      paragraphs: [
+        'This is the complete list. If it looks short, that is because it is — this site sets one cookie of its own and nothing else runs unless you switch it on.',
+      ],
       table: {
         columns: ['Name', 'Type', 'Purpose', 'Duration'],
         rows: [
-          ['cx_consent', 'Strictly necessary', 'Stores your cookie preferences so we can honour them', '12 months'],
-          ['cx_session', 'Strictly necessary', 'Maintains security state during a browsing session', 'Session'],
-          ['cx_csrf', 'Strictly necessary', 'Protects form submissions against cross-site request forgery', 'Session'],
-          ['_ga / _ga_*', 'Analytics (consent)', 'Aggregate usage measurement — which pages are read and how people navigate', '13 months'],
+          [
+            'cx_consent',
+            'Strictly necessary',
+            'Records your cookie choice so we can honour it and evidence that we did. Mirrored in local storage.',
+            '12 months',
+          ],
         ],
       },
+    },
+    {
+      heading: 'Analytics',
       paragraphs: [
-        'Strictly necessary cookies do not require consent under the ePrivacy Directive because the service you requested cannot be provided without them. Analytics cookies are set only after you consent, and IP addresses are truncated before storage.',
+        'No analytics is currently running on this site. The preferences control includes an analytics toggle so that, if we do introduce aggregate measurement, it will only ever run for visitors who have switched it on — never by default and never retroactively.',
+        'If that changes, this policy is updated with the specific cookies involved before the change goes live, and anyone who previously declined stays declined.',
+      ],
+    },
+    {
+      heading: 'Consent and the law',
+      paragraphs: [
+        'Strictly necessary cookies do not require consent under the ePrivacy Directive, because the service you asked for cannot be provided without them. Everything else requires your opt-in, and we treat a Global Privacy Control or Do Not Track signal as a standing opt-out — if your browser sends one, non-essential storage is disabled without you having to interact with anything.',
       ],
     },
     {
       heading: 'Managing your preferences',
       list: [
-        'Use the cookie preferences control in the site footer to change your choice at any time',
+        'Use the "Cookie preferences" control in the site footer to change your choice at any time',
         'Configure your browser to block or delete cookies — every major browser supports this in its privacy settings',
-        'Enable "Do Not Track" or Global Privacy Control; we honour GPC signals as an opt-out of analytics',
+        'Enable Global Privacy Control or Do Not Track; we honour both as a standing opt-out',
         'Use browser extensions that block tracking technologies',
       ],
       paragraphs: [
-        'Blocking strictly necessary cookies may cause parts of the site — particularly form submission — to stop working. Blocking analytics cookies has no effect on how the site behaves for you.',
+        'Blocking the consent cookie means we cannot remember your choice, so you will be asked again on your next visit. Nothing else about the site changes — no feature depends on cookies.',
       ],
     },
     {

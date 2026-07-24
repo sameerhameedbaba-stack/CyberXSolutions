@@ -3,6 +3,7 @@ import { site, footerNav, legalNav } from '@/content/site';
 import { trustMarkers } from '@/content/social';
 import { Icon } from '@/components/ui/Icon';
 import { LogoMark } from './Logo';
+import { CookiePreferencesButton } from './CookieConsent';
 
 const socials = [
   { label: 'LinkedIn', href: site.social.linkedin, icon: 'linkedin' },
@@ -137,6 +138,9 @@ export function Footer() {
                 </Link>
               </li>
             ))}
+            <li>
+              <CookiePreferencesButton className="text-[0.8125rem] text-ink-300 transition-colors duration-300 hover:text-white" />
+            </li>
           </ul>
         </div>
       </div>

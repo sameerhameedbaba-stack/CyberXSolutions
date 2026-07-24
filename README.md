@@ -19,7 +19,8 @@ npm run dev          # http://localhost:3000
 npm run build        # production build
 npm start            # serve the production build
 npm run typecheck    # tsc --noEmit
-npm run qa           # typecheck + accessibility + responsive gates
+npm run lint         # ESLint (next/core-web-vitals)
+npm run qa           # typecheck + accessibility + responsive + link gates
 ```
 
 Requires Node 20 or later.
@@ -49,7 +50,9 @@ src/
 │   ├── layout.tsx              Fonts, global metadata, Organization + WebSite JSON-LD
 │   ├── globals.css             Design tokens, glass, aurora, motion primitives
 │   ├── api/contact/route.ts    Validated contact endpoint
-│   ├── sitemap.ts robots.ts manifest.ts
+│   ├── opengraph-image.tsx     Default social card; services/blog/case studies have their own
+│   ├── error.tsx global-error.tsx not-found.tsx
+│   ├── sitemap.ts robots.ts manifest.ts apple-icon.tsx
 │   └── …
 ├── components/
 │   ├── ui/                     Primitives: Button, Icon, Section, Reveal, Counter, Accordion…
@@ -117,15 +120,39 @@ WCAG 2.2 AA is the floor, verified rather than asserted:
 fails on horizontal overflow or any runtime error. Current state: clean across all 186
 combinations.
 
+## Links and markup
+
+`npm run qa:links` crawls every internal link on every route, checks each resolves, and fails
+on duplicate DOM ids, broken `#fragment` targets or unlabelled anchors. Current state: 50
+internal targets, all resolving, no duplicates.
+
 ## SEO
 
 - Per-page `title`, `description`, `keywords`, canonical URL, Open Graph and Twitter cards
   via `src/lib/seo.ts`.
 - JSON-LD via `src/lib/schema.ts`: `Organization`, `WebSite`, `Service`, `BreadcrumbList`,
   `FAQPage`, `Article`, `CollectionPage`.
+- Social cards generated at build time with `next/og`: a default card plus bespoke ones for
+  every service, blog post and case study, carrying that page's headline and metrics.
 - `sitemap.xml`, `robots.txt`, a human-readable `/sitemap` page, and dense internal linking
   (every page carries a "Keep exploring" rail).
 - Security headers are set in `next.config.mjs`.
+
+---
+
+## Privacy and consent
+
+A first-party consent system ships with the site — no third-party CMP:
+
+- One cookie, `cx_consent`, storing the decision for twelve months.
+- Banner on first visit; preferences dialog reachable any time from the footer.
+- Global Privacy Control and Do Not Track are honoured as a standing opt-out, so those
+  visitors are opted out silently and never shown a banner.
+- Nothing non-essential runs before opt-in. Wire an analytics provider to
+  `onConsentChange()` in `src/lib/consent.ts` and it will stay dormant until consent is given.
+
+The cookie policy in `src/content/legal.ts` describes exactly what the site sets — currently
+one cookie and no analytics. Keep it that way if you add a provider.
 
 ---
 

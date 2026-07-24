@@ -4,7 +4,9 @@ import './globals.css';
 import { site } from '@/content/site';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { CookieConsent } from '@/components/layout/CookieConsent';
 import { JsonLd } from '@/components/ui/Bits';
+import { SvgDefs } from '@/components/ui/SvgDefs';
 import { graph, organizationSchema, websiteSchema } from '@/lib/schema';
 
 const inter = Inter({
@@ -90,9 +92,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${inter.variable} ${jakarta.variable} ${mono.variable}`}>
       <body>
         <JsonLd data={graph(organizationSchema(), websiteSchema())} />
+        <SvgDefs />
         <Header />
         <main id="main">{children}</main>
         <Footer />
+        <CookieConsent />
       </body>
     </html>
   );

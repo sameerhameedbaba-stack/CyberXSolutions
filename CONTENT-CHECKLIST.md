@@ -116,16 +116,18 @@ platform vendors do enforce partner-badge usage.
 
 ---
 
-## 9. Resource downloads
+## 9. Resource artefacts — **partly resolved**
 
 `src/content/insights.ts` → `resourceItems`
 
-Six frameworks are described (readiness assessment, guardrail specification, payback
-calculator, governance starter, performance budget template, migration checklist). They
-currently link to related pages rather than to files.
+Six frameworks are described. Each now carries an `action` label that states honestly what
+the link does — "Read the specification" for the ones published in full on this site,
+"Request a copy" for the two working documents that route to the contact form. Nothing
+promises a download it cannot deliver.
 
-Produce the actual artefacts and update each `href`, or reword the page to describe them as
-methodology rather than downloads.
+**Remaining work:** produce the actual assessment sheet and payback spreadsheet so the
+"request a copy" path has something to send. Until then, be ready to answer those requests
+manually.
 
 ---
 
@@ -137,8 +139,8 @@ Six full articles, credited to "CyberXSolutions Engineering" / "Growth" / "Secur
 than to individuals. The technical content is sound and reflects genuine practice, but review
 for factual accuracy against your own experience, and re-attribute to real authors.
 
-The post dated `2026-06-18` and others carry future-looking dates — adjust to real
-publication dates.
+Publication dates run January to June 2026 and are all in the past — adjust them to the
+dates you actually publish on.
 
 ---
 
@@ -152,19 +154,34 @@ schedules, transfer mechanisms, Michigan governing law).
 particular confirm:
 
 - The processor categories and retention periods match actual practice
-- The cookie table matches what the deployed site actually sets (currently it describes an
-  analytics cookie that is not yet installed)
+- The cookie table still matches what the deployed site sets — it currently lists exactly one
+  cookie, `cx_consent`, which is accurate as built
 - The effective date (currently 1 January 2026)
 
 ---
 
-## 12. Analytics
+## 12. Analytics and consent — **resolved, optional wiring remains**
 
-No analytics is installed. The cookie policy describes a consent-gated analytics cookie and
-the footer references a cookie preferences control that does not exist yet.
+A full consent system now ships: a banner for first-time visitors, a preferences dialog
+reachable from the footer, a twelve-month stored decision, and Global Privacy Control and
+Do Not Track honoured as a standing opt-out (those visitors are never shown a banner).
 
-Either install a consent-gated analytics setup and build the preferences control, or remove
-the analytics row from the cookie table and the footer reference.
+The cookie policy was rewritten to describe exactly one cookie — `cx_consent` — because that
+is the only one the site sets. It states plainly that no analytics is currently running.
+
+**If you want analytics**, wire a provider to the consent hook; nothing loads until a visitor
+opts in:
+
+```ts
+import { onConsentChange, readConsent } from '@/lib/consent';
+
+if (readConsent()?.analytics) loadAnalytics();
+onConsentChange((next) => { if (next.analytics) loadAnalytics(); });
+```
+
+Add the provider's cookies to the table in `src/content/legal.ts` **before** the change goes
+live. If you do not want analytics at all, delete the toggle from
+`src/components/layout/CookieConsent.tsx` and the "Analytics" section from the cookie policy.
 
 ---
 
@@ -182,6 +199,8 @@ npm run build
 npm start &
 QA_BASE_URL=http://localhost:3000 npm run qa:a11y        # expect: zero violations
 QA_BASE_URL=http://localhost:3000 npm run qa:responsive  # expect: no overflow
+QA_BASE_URL=http://localhost:3000 npm run qa:links       # expect: no 404s, no duplicate ids
+npm run lint                                             # expect: clean
 ```
 
 Then run Lighthouse against the production deployment and confirm Core Web Vitals on a real

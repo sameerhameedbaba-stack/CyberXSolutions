@@ -40,7 +40,11 @@ function PanelShell({
   );
 }
 
-/** Animated dashed connector, horizontal on desktop and vertical on mobile. */
+/**
+ * Animated dashed connector, horizontal on desktop and vertical on mobile.
+ * Renders many times per page, so its gradients come from the shared
+ * <SvgDefs> in the root layout rather than being redefined per instance.
+ */
 function FlowConnector({ vertical = false, className }: { vertical?: boolean; className?: string }) {
   if (vertical) {
     return (
@@ -50,18 +54,12 @@ function FlowConnector({ vertical = false, className }: { vertical?: boolean; cl
           y1="0"
           x2="2"
           y2="24"
-          stroke="url(#flow-v)"
+          stroke="url(#cx-flow-v)"
           strokeWidth="2"
           strokeDasharray="5 5"
           strokeLinecap="round"
           className="animate-dash-flow"
         />
-        <defs>
-          <linearGradient id="flow-v" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#2F6BFF" />
-            <stop offset="100%" stopColor="#8B5CF6" />
-          </linearGradient>
-        </defs>
       </svg>
     );
   }
@@ -73,20 +71,13 @@ function FlowConnector({ vertical = false, className }: { vertical?: boolean; cl
         y1="2"
         x2="100"
         y2="2"
-        stroke="url(#flow-h)"
+        stroke="url(#cx-flow-h)"
         strokeWidth="2"
         strokeDasharray="5 5"
         strokeLinecap="round"
         className="animate-dash-flow"
         vectorEffect="non-scaling-stroke"
       />
-      <defs>
-        <linearGradient id="flow-h" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#06B6D4" />
-          <stop offset="50%" stopColor="#2F6BFF" />
-          <stop offset="100%" stopColor="#8B5CF6" />
-        </linearGradient>
-      </defs>
     </svg>
   );
 }

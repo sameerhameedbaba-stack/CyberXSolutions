@@ -294,6 +294,8 @@ export const resourceItems: {
   accent: 'blue' | 'violet' | 'cyan' | 'emerald' | 'orange' | 'pink' | 'indigo';
   href: string;
   meta: string;
+  /** What the link actually does — no link promises a download it cannot give. */
+  action: string;
 }[] = [
   {
     title: 'AI readiness assessment',
@@ -304,6 +306,7 @@ export const resourceItems: {
     accent: 'blue',
     href: '/contact',
     meta: '40 questions · self-scored',
+    action: 'Request a copy',
   },
   {
     title: 'Agent guardrail specification',
@@ -314,6 +317,7 @@ export const resourceItems: {
     accent: 'emerald',
     href: '/blog/what-guardrails-actually-mean',
     meta: 'Reference implementation',
+    action: 'Read the specification',
   },
   {
     title: 'Automation payback calculator',
@@ -324,6 +328,7 @@ export const resourceItems: {
     accent: 'violet',
     href: '/contact',
     meta: 'Spreadsheet model',
+    action: 'Request the model',
   },
   {
     title: 'Enterprise AI governance starter',
@@ -334,6 +339,7 @@ export const resourceItems: {
     accent: 'indigo',
     href: '/enterprise-solutions',
     meta: 'Policy templates',
+    action: 'See the framework',
   },
   {
     title: 'Core Web Vitals budget template',
@@ -344,6 +350,7 @@ export const resourceItems: {
     accent: 'cyan',
     href: '/web-development',
     meta: 'CI configuration',
+    action: 'See how we apply it',
   },
   {
     title: 'Migration protection checklist',
@@ -354,5 +361,6 @@ export const resourceItems: {
     accent: 'orange',
     href: '/seo',
     meta: '38-point checklist',
+    action: 'See how we apply it',
   },
 ];
