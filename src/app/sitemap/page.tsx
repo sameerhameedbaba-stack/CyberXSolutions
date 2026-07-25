@@ -12,6 +12,7 @@ import { allRoutes, site } from '@/content/site';
 import { caseStudies } from '@/content/caseStudies';
 import { posts } from '@/content/insights';
 import { buildMetadata } from '@/lib/seo';
+import { withBasePath } from '@/lib/basePath';
 
 export const metadata: Metadata = buildMetadata({
   title: 'Sitemap — Every page on this site',
@@ -53,7 +54,7 @@ export default function SitemapPage() {
               <p className="mt-6 text-lead text-ink-500">
                 A human-readable index of the whole site. The machine-readable version lives at{' '}
                 <a
-                  href="/sitemap.xml"
+                  href={withBasePath('/sitemap.xml')}
                   className="font-semibold text-brand-600 underline decoration-brand-300 underline-offset-4 hover:text-brand-700"
                 >
                   /sitemap.xml
@@ -176,11 +177,11 @@ export default function SitemapPage() {
 
         <Reveal delay={160}>
           <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-3 rounded-2xl border border-ink-100 bg-white p-6">
-            <a href="/sitemap.xml" className="link-arrow text-sm">
+            <a href={withBasePath('/sitemap.xml')} className="link-arrow text-sm">
               XML sitemap
               <Icon name="arrow-up-right" className="h-4 w-4" />
             </a>
-            <a href="/robots.txt" className="link-arrow text-sm">
+            <a href={withBasePath('/robots.txt')} className="link-arrow text-sm">
               robots.txt
               <Icon name="arrow-up-right" className="h-4 w-4" />
             </a>

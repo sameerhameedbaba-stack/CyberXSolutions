@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Reveal } from '@/components/ui/Reveal';
@@ -70,12 +71,12 @@ export function CTA({
                   <Button href={primary.href} size="lg" arrow className="w-full sm:w-auto">
                     {primary.label}
                   </Button>
-                  <a
+                  <Link
                     href={secondary.href}
                     className="btn btn-lg w-full border border-white/20 bg-white/5 text-white backdrop-blur transition-all duration-300 ease-smooth hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/10 sm:w-auto"
                   >
                     {secondary.label}
-                  </a>
+                  </Link>
                 </div>
               </div>
 

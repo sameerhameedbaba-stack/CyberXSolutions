@@ -10,6 +10,10 @@
  */
 const isStatic = process.env.BUILD_TARGET === 'static';
 
+// Serving from a subdirectory rather than a domain root — GitHub Pages puts
+// the site under /<repo>/. Empty for Hostinger, which serves from the root.
+const basePath = process.env.BUILD_BASE_PATH || '';
+
 const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -37,6 +41,7 @@ const nextConfig = {
         // Emits /about/index.html rather than /about.html, which is what a
         // plain Apache docroot expects.
         trailingSlash: true,
+        ...(basePath ? { basePath, assetPrefix: basePath } : {}),
       }
     : {
         // next.config headers only apply when Node serves the site. The static

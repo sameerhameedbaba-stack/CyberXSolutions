@@ -4,6 +4,7 @@ import { useId, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Icon } from '@/components/ui/Icon';
 import { site } from '@/content/site';
+import Link from 'next/link';
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 type Errors = Partial<Record<'name' | 'email' | 'message' | 'form', string>>;
@@ -302,9 +303,9 @@ export function ContactForm() {
 
       <p className="mt-5 border-t border-ink-100 pt-5 text-[0.75rem] leading-relaxed text-ink-400">
         We use what you send only to answer your enquiry. No mailing list, no sequence, no resale. See our{' '}
-        <a href="/privacy-policy" className="font-semibold text-ink-600 underline underline-offset-2 hover:text-brand-600">
+        <Link href="/privacy-policy" className="font-semibold text-ink-600 underline underline-offset-2 hover:text-brand-600">
           privacy policy
-        </a>
+        </Link>
         .
       </p>
     </form>

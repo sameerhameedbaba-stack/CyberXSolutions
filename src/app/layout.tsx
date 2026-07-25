@@ -8,6 +8,7 @@ import { CookieConsent } from '@/components/layout/CookieConsent';
 import { JsonLd } from '@/components/ui/Bits';
 import { SvgDefs } from '@/components/ui/SvgDefs';
 import { graph, organizationSchema, websiteSchema } from '@/lib/schema';
+import { withBasePath } from '@/lib/basePath';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -70,9 +71,11 @@ export const metadata: Metadata = {
       'max-video-preview': -1,
     },
   },
+  // Next applies basePath to `manifest` but not to icon URLs, so these are
+  // prefixed by hand — otherwise the favicon 404s on a subdirectory deploy.
   icons: {
-    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
-    apple: [{ url: '/icon.svg' }],
+    icon: [{ url: withBasePath('/icon.svg'), type: 'image/svg+xml' }],
+    apple: [{ url: withBasePath('/icon.svg') }],
   },
   manifest: '/manifest.webmanifest',
 };

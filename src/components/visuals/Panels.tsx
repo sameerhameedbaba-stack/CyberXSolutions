@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Icon, IconTile, type Accent } from '@/components/ui/Icon';
 
@@ -206,13 +207,19 @@ export function ContactPanel({
               </>
             );
 
+            // Channels mix internal routes with mailto: and tel:. Link handles
+            // the former, including the base path; the rest stay plain anchors.
+            const cardClass =
+              'group flex items-start gap-3.5 rounded-2xl border border-ink-100 bg-white p-4 transition-all duration-300 ease-smooth hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lift';
+
             return (
               <li key={channel.label}>
-                {channel.href ? (
-                  <a
-                    href={channel.href}
-                    className="group flex items-start gap-3.5 rounded-2xl border border-ink-100 bg-white p-4 transition-all duration-300 ease-smooth hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lift"
-                  >
+                {channel.href?.startsWith('/') ? (
+                  <Link href={channel.href} className={cardClass}>
+                    {inner}
+                  </Link>
+                ) : channel.href ? (
+                  <a href={channel.href} className={cardClass}>
                     {inner}
                   </a>
                 ) : (

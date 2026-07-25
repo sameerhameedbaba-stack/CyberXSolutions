@@ -1,0 +1,87 @@
+name: Deploy to GitHub Pages
+
+# A deploy that needs no credentials at all. GitHub Pages authenticates with
+# the automatic GITHUB_TOKEN, so this works with zero repository secrets —
+# unlike the Hostinger workflows, which need FTP or SSH credentials.
+#
+# Publishes to https://sameerhameedbaba-stack.github.io/CyberXSolutions/
+#
+# The site is built with BUILD_BASE_PATH because Pages serves it from the
+# /CyberXSolutions/ subdirectory; without it every asset URL would 404.
+# To move to cyberxsolutions.us later: add the domain under Settings → Pages →
+# Custom domain, point a CNAME at sameerhameedbaba-stack.github.io in
+# Hostinger's DNS, and drop BUILD_BASE_PATH so the site builds for a root.
+
+on:
+  push:
+    branches: [main, claude/hostinger-ftp-password-secret-onfcmv]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never cancel a half-finished upload; queue instead.
+concurrency:
+  group: deploy-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # enablement: true turns Pages on through the API, so nobody has to
+      # visit the settings page to switch the source to GitHub Actions.
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck and lint
+        run: |
+          npm run typecheck
+          npm run lint
+
+      - name: Build static export
+        env:
+          BUILD_BASE_PATH: /CyberXSolutions
+          NEXT_PUBLIC_CONTACT_ENDPOINT: ${{ vars.CONTACT_ENDPOINT }}
+        run: npm run build:static
+
+      - name: Verify the export looks sane
+        run: |
+          test -f out/index.html || { echo "::error::out/index.html missing"; exit 1; }
+          test -f out/sitemap.xml || { echo "::error::sitemap missing"; exit 1; }
+          pages=$(find out -name index.html | wc -l)
+          echo "Exported $pages pages, $(du -sh out | cut -f1) total"
+          [ "$pages" -ge 30 ] || { echo "::error::only $pages pages exported, expected 30+"; exit 1; }
+          grep -q '/CyberXSolutions/_next/' out/index.html \
+            || { echo "::error::asset URLs are missing the base path — they would 404 on Pages"; exit 1; }
+          # _next/ would be dropped as a Jekyll internal directory.
+          touch out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
