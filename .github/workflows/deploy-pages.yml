@@ -6,6 +6,13 @@ name: Deploy to GitHub Pages
 #
 # Publishes to https://sameerhameedbaba-stack.github.io/CyberXSolutions/
 #
+# One repository setting is required, because a workflow cannot grant itself
+# more access than the repository allows: Settings → Actions → General →
+# Workflow permissions → "Read and write permissions". New repositories
+# default to read-only, and without the change the Configure Pages step fails
+# with "Resource not accessible by integration". Nothing else needs setting up
+# — enablement below turns Pages on through the API.
+#
 # The site is built with BUILD_BASE_PATH because Pages serves it from the
 # /CyberXSolutions/ subdirectory; without it every asset URL would 404.
 # To move to cyberxsolutions.us later: add the domain under Settings → Pages →
