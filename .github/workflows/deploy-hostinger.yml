@@ -33,6 +33,31 @@ jobs:
     timeout-minutes: 20
 
     steps:
+      # First, so a missing credential costs two seconds instead of a full
+      # build. The FTP action reports only "Input required and not supplied:
+      # password", which does not say which secret or that blank counts as
+      # missing — hence checking here where we can name the problem.
+      - name: Check the deploy credentials are present
+        env:
+          FTP_HOST: ${{ secrets.HOSTINGER_FTP_HOST }}
+          FTP_USER: ${{ secrets.HOSTINGER_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+        run: |
+          missing=""
+          [ -n "$FTP_HOST" ]     || missing="$missing HOSTINGER_FTP_HOST"
+          [ -n "$FTP_USER" ]     || missing="$missing HOSTINGER_FTP_USER"
+          [ -n "$FTP_PASSWORD" ] || missing="$missing HOSTINGER_FTP_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing or empty repository secret(s):$missing"
+            echo "Add them under Settings → Secrets and variables → Actions →"
+            echo "Repository secrets. A secret saved with an empty value fails"
+            echo "here exactly like one that was never added, so after saving,"
+            echo "reload that page and confirm the row shows an 'Updated'"
+            echo "timestamp of just now."
+            exit 1
+          fi
+          echo "All three FTP secrets are present and non-empty."
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4

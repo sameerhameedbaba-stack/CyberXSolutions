@@ -33,6 +33,27 @@ jobs:
     timeout-minutes: 20
 
     steps:
+      # First, so a missing credential costs two seconds instead of a full
+      # build.
+      - name: Check the deploy credentials are present
+        env:
+          SSH_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+          SSH_HOST: ${{ secrets.HOSTINGER_SSH_HOST }}
+          SSH_USER: ${{ secrets.HOSTINGER_SSH_USER }}
+        run: |
+          missing=""
+          [ -n "$SSH_KEY" ]  || missing="$missing HOSTINGER_SSH_KEY"
+          [ -n "$SSH_HOST" ] || missing="$missing HOSTINGER_SSH_HOST"
+          [ -n "$SSH_USER" ] || missing="$missing HOSTINGER_SSH_USER"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing or empty repository secret(s):$missing"
+            echo "Add them under Settings → Secrets and variables → Actions →"
+            echo "Repository secrets. HOSTINGER_SSH_KEY must be the whole PEM"
+            echo "private key including its header and footer lines."
+            exit 1
+          fi
+          echo "All three SSH secrets are present and non-empty."
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
