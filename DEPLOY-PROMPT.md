@@ -1,105 +1,104 @@
 # Prompt for the Claude Chrome extension
 
-Copy everything between the lines into the extension. Have the Hostinger hPanel and GitHub
-open and logged in first — the extension drives your browser, so it uses your existing
-sessions and never needs a password typed to it.
+Everything below the line is self-contained — paste it into a fresh Chrome extension session
+and it will have all the context it needs. Log into **Hostinger hPanel** and **GitHub** in the
+same browser first; the extension drives your existing sessions.
+
+Two things the extension will not do, by design, and that you must do yourself:
+
+1. **Type or read the FTP password.** It will open the right form and stop.
+2. **Delete files** in `public_html`. It will report what is there and stop.
 
 ---
 
-You are helping me put a website live on Hostinger. The code is already written, tested and
-pushed. Your job is only the hosting configuration, in the browser.
+You are helping me finish putting a website live on Hostinger. The code is written, tested and
+pushed — nothing about the site itself needs changing. Your job is the hosting and CI
+configuration in the browser, and reporting back accurately.
+
+## What is already true
+
+Do not re-verify these unless something contradicts them. They were confirmed in an earlier
+session.
 
 **Repository:** `sameerhameedbaba-stack/cyberxsolutions`
-**Branch with the site:** `claude/cyberxsolutions-enterprise-site-ozu7he`
-**Domain:** cyberxsolutions.us
+**Branch that deploys:** `main` (the workflow triggers on push to `main`, and can be run
+manually)
+**Domain:** cyberxsolutions.us — provisioned on the plan, Lifetime SSL active for the apex,
+expires Never. There is no "Force HTTPS" toggle on this plan and none is enabled; the site
+ships its own `.htaccess` redirect, so that is correct — do not go looking for the toggle.
 
-Work through these in order. Tell me what you find at each step before moving on, and stop
-and ask me if anything does not match what is described here.
+**Hosting plan:** Premium Web Hosting. There is **no Node.js support** anywhere in the panel.
+This is expected and already accounted for: the site builds as a static export (plain HTML,
+CSS, JS) that needs no Node at runtime. Do not suggest switching plans.
 
-## Step 1 — Identify the hosting plan
+**FTP account** (already exists, do not create another):
 
-Open Hostinger hPanel → Hosting. Tell me:
-- the plan name (Premium / Business / Cloud / VPS)
-- whether a "Node.js" section exists under Advanced or Website
-- whether Git deployment is available
-- which domain the plan is attached to, and whether cyberxsolutions.us already points at it
+| Field | Value |
+| --- | --- |
+| Host | `185.224.137.200` |
+| Username | `u739945294.cyberxsolutions.us` |
+| Port | `21` (explicit FTPS via AUTH TLS) |
+| Home directory | `public_html` |
 
-This decides everything after, so do not skip it.
+**SSH is also active** on this account: same IP, port `65002`, username `u739945294`. That is
+the fallback if FTPS fails — details at the end.
 
-## Step 2 — Confirm the domain and SSL
+**GitHub secrets currently set:** `HOSTINGER_FTP_HOST`, `HOSTINGER_FTP_USER`. That is two.
+**`HOSTINGER_FTP_PASSWORD` is missing** — that is the entire reason the last deploy failed.
 
-In hPanel:
-- Check cyberxsolutions.us resolves to this hosting account. If the domain is registered
-  elsewhere, note the nameservers Hostinger wants so I can update them.
-- Under Security → SSL, issue a free SSL certificate for the domain if one is not active.
-  Tell me the status. Do not enable "Force HTTPS" in hPanel — the site ships its own
-  `.htaccess` that handles the redirect, and having both can cause a redirect loop.
+**Last workflow run:** failed at the Upload step with
+`Error: Input required and not supplied: password`. Every step before it passed, and the build
+logged `Exported 40 pages, 19M total`. So the pipeline is proven; only the credential is
+missing.
 
-## Step 2b — Clear the Hostinger placeholder
+## Step 1 — Add the missing secret
+
+Go to
+`https://github.com/sameerhameedbaba-stack/cyberxsolutions/settings/secrets/actions`.
+
+I will set the FTP password myself in hPanel → Files → FTP Accounts → "Change FTP password",
+then type it into the GitHub form.
+
+Your part: open the "New repository secret" form (button at the top right of the Repository
+secrets list), put `HOSTINGER_FTP_PASSWORD` in the Name field exactly as written, and hand
+control back to me for the Value field. **Do not type, read, or guess the password.**
+
+After I have entered it, I will click **Add secret** — that is the step that got missed last
+time, so confirm with me that I clicked it. Then reload the page and tell me how many
+repository secrets are listed. It must be **three**. If it still says two, the form was
+abandoned and we go round again.
+
+## Step 2 — Confirm the deploy target is empty
 
 hPanel → Files → File Manager → `public_html`.
 
-Hostinger provisions this folder with a placeholder (usually `default.php`, sometimes an
-`index.php` or a "coming soon" page). **Delete everything already in `public_html`** so the
-deploy lands in a clean directory. The site ships its own `.htaccess`, so nothing in there
-needs preserving.
+Tell me every file and folder in there. Expect a single Hostinger placeholder,
+`default.php` (~16 KiB).
 
-Tell me what you found and deleted before continuing.
+**Do not delete anything.** Report the contents and I will delete it. The site pins
+`DirectoryIndex index.html index.htm` in its own `.htaccess`, so even if `default.php`
+survives, `index.html` wins — but a clean directory is still better.
 
-## Step 3 — Create an FTP account
+There is also a `DO_NOT_UPLOAD_HERE` marker one level up, outside `public_html`. That is
+Hostinger's own signpost. Leave it alone; nothing deploys to that level.
 
-hPanel → Files → FTP Accounts. Create one (or use the existing one) with its home directory
-set to `public_html`. Report back:
-- FTP hostname
-- FTP username
-- the port
+## Step 3 — Run the deploy
 
-Do not paste the password into the chat. You will put it straight into GitHub in the next
-step.
+`https://github.com/sameerhameedbaba-stack/cyberxsolutions/actions` → "Deploy to Hostinger" →
+**Run workflow** on branch `main`.
 
-## Step 4 — Add the deployment secrets to GitHub
+Watch it and report:
 
-Go to
-`https://github.com/sameerhameedbaba-stack/cyberxsolutions/settings/secrets/actions`
-and add three repository secrets:
+- pass/fail for each step: Install dependencies, Typecheck and lint, Build static export,
+  Verify the export, Upload to Hostinger
+- the exact line reading `Exported N pages, … total` — N should be **40**
+- the upload result: how many files transferred, or the **full error text** if it fails
 
-| Name | Value |
-| --- | --- |
-| `HOSTINGER_FTP_HOST` | the FTP hostname from step 3 |
-| `HOSTINGER_FTP_USER` | the FTP username from step 3 |
-| `HOSTINGER_FTP_PASSWORD` | that account's password |
+Quote errors verbatim. Do not paraphrase them and do not try alternative settings on your own.
 
-Then open the "Variables" tab on the same page and add:
+## Step 4 — Verify the live site
 
-| Name | Value |
-| --- | --- |
-| `FTP_SERVER_DIR` | `./` |
-
-`./` is deliberate, not a typo. Hostinger's main FTP account is already rooted at
-`public_html`, so the upload lands there on connect. Setting this to `public_html/` would
-deploy into `public_html/public_html/` and the site would appear dead with a green
-workflow.
-
-## Step 5 — Trigger and watch the deploy
-
-`main` already exists and the workflow has already run once — it will have failed at the
-final upload step, because the FTP secrets did not exist yet. That is expected.
-
-Go to `https://github.com/sameerhameedbaba-stack/cyberxsolutions/actions`, open
-"Deploy to Hostinger", and click **Re-run all jobs**. Now that the secrets are set it should
-complete. Report:
-- whether each step passes (install, typecheck, lint, build, verify, upload)
-- the line that reads "Exported N pages" — N should be 40
-- any error output, in full, if it fails
-
-If the FTP step fails, the usual causes are: wrong hostname, the FTP account's home
-directory not being `public_html`, or the plan blocking FTPS. Tell me the exact error rather
-than trying alternatives — this hosting account has SSH enabled, so there is a good fallback
-if FTP proves unreliable.
-
-## Step 6 — Verify the live site
-
-Once the workflow is green, open these and confirm each loads correctly over **https**:
+Only once the workflow is green. Open each of these and confirm it loads over **https**:
 
 - https://cyberxsolutions.us/
 - https://cyberxsolutions.us/ai-agents/
@@ -108,35 +107,52 @@ Once the workflow is green, open these and confirm each loads correctly over **h
 - https://cyberxsolutions.us/sitemap.xml
 - https://cyberxsolutions.us/robots.txt
 
-Then check:
+Then check each of these behaviours:
+
 - **http**://cyberxsolutions.us redirects to https
 - www.cyberxsolutions.us redirects to the apex domain
-- a made-up URL like https://cyberxsolutions.us/nope/ shows the site's own 404 page, not an
-  Apache error page
+- a made-up URL such as https://cyberxsolutions.us/nope/ shows the site's own styled 404 page,
+  not an Apache error page
 - the cookie banner appears at the bottom on first load
-- https://cyberxsolutions.us/opengraph-image loads as an **image**, not a download prompt.
-  If it downloads instead of displaying, the `.htaccess` did not upload — hidden files were
-  probably skipped. Tell me.
+- https://cyberxsolutions.us/opengraph-image renders **as an image**, not a download prompt
 
-Report anything that does not behave as described. Do not edit any site files to fix it —
-tell me instead, and I will fix it in the repository.
+The last two are the ones that catch a bad upload. If the site loads but looks completely
+unstyled, or if `opengraph-image` downloads instead of displaying, the `.htaccess` did not
+transfer — hidden files were skipped. Tell me; that is a workflow fix, not something to
+patch in the File Manager.
 
----
+Report anything that does not behave as described. **Do not edit site files to fix it** — I
+fix things in the repository and redeploy.
 
-## If step 1 says VPS
+## If the upload fails on anything TLS or certificate related
 
-Ignore steps 3, 4 and 6. A VPS runs Node, so the site should use the full build with a
-working contact endpoint instead of the static export. Tell me it is a VPS and I will give
-you a different set of instructions.
+Likely, and already planned for: the FTP host is a bare IP address, so its certificate cannot
+match the hostname.
+
+**Do not switch the workflow to plain FTP.** That would send the password in clear text.
+
+Tell me the exact error and stop. A second workflow, "Deploy to Hostinger (SSH)", is already
+committed and ready — it uses rsync over SSH on port 65002 with key authentication. Arming it
+needs an SSH keypair generated outside the browser, so it is my job, not yours.
 
 ## After it is live
 
-Two things still need doing that the browser cannot:
+Two things remain that the deploy cannot do:
 
-1. **The contact form is not wired up.** In static mode it needs an external handler. Create
-   a free Formspree or Web3Forms endpoint, then add its URL as a GitHub repository variable
-   named `CONTACT_ENDPOINT` and re-run the workflow. Until then the form tells visitors to
-   email support@cyberxsolutions.us, which still works.
-
+1. **The contact form has no handler.** In static mode it needs an external one. Create a free
+   Formspree or Web3Forms endpoint, add its URL as a GitHub repository **variable** named
+   `CONTACT_ENDPOINT` (Variables tab, same settings page as the secrets), and re-run the
+   workflow. Until then the form tells visitors to email support@cyberxsolutions.us, which
+   works.
 2. **Submit the sitemap.** Google Search Console → add cyberxsolutions.us as a property →
    submit `https://cyberxsolutions.us/sitemap.xml`. Same in Bing Webmaster Tools.
+
+---
+
+## Note on `FTP_SERVER_DIR`
+
+If you ever see a repository variable named `FTP_SERVER_DIR`, its value must be `./` — not
+`public_html/`. The FTP account is already rooted at `public_html`, so pointing it at
+`public_html/` deploys into `public_html/public_html/`: the workflow goes green and the site
+stays dead. The workflow defaults to `./` when the variable is absent, so leaving it unset is
+also correct.
