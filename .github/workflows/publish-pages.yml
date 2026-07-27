@@ -1,0 +1,110 @@
+name: Publish to GitHub Pages
+
+# Builds the static export and pushes it to the gh-pages branch, which Pages is
+# configured to serve. Needs no secrets and no admin rights: the built-in
+# GITHUB_TOKEN with contents:write is enough.
+#
+# The Actions-based Pages deployment was tried first and cannot work here —
+# actions/configure-pages fails with "Resource not accessible by integration"
+# because creating a Pages site needs repository admin, which GITHUB_TOKEN
+# never has. Publishing to a branch sidesteps that entirely.
+#
+# Default URL: https://sameerhameedbaba-stack.github.io/CyberXSolutions/
+#
+# Optional repository variables (Settings -> Secrets and variables -> Actions):
+#   PAGES_CUSTOM_DOMAIN  e.g. cyberxsolutions.us. Setting this writes a CNAME
+#                        file and drops the sub-path, since a custom domain
+#                        serves from the root. Point DNS at GitHub Pages first.
+#   CONTACT_ENDPOINT     external form handler URL
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Work out the base path
+        id: base
+        env:
+          CUSTOM_DOMAIN: ${{ vars.PAGES_CUSTOM_DOMAIN }}
+        run: |
+          # A custom domain serves from the root; a project site serves from
+          # /<repo>/ and every asset URL has to carry that prefix.
+          if [ -n "$CUSTOM_DOMAIN" ]; then
+            echo "path=" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=/${GITHUB_REPOSITORY#*/}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build static export
+        env:
+          BASE_PATH: ${{ steps.base.outputs.path }}
+          NEXT_PUBLIC_CONTACT_ENDPOINT: ${{ vars.CONTACT_ENDPOINT }}
+        run: npm run build:static
+
+      - name: Prepare the branch contents
+        env:
+          CUSTOM_DOMAIN: ${{ vars.PAGES_CUSTOM_DOMAIN }}
+        run: |
+          set -euo pipefail
+
+          # Without this, Pages runs the output through Jekyll, which drops every
+          # directory beginning with an underscore — including _next. The site
+          # would load with no CSS or JavaScript at all.
+          touch out/.nojekyll
+
+          # Apache config means nothing to Pages.
+          rm -f out/.htaccess
+
+          if [ -n "$CUSTOM_DOMAIN" ]; then
+            echo "$CUSTOM_DOMAIN" > out/CNAME
+            echo "Serving at https://$CUSTOM_DOMAIN/"
+          else
+            # A project sub-path is a preview, not the canonical home, so keep it
+            # out of search results.
+            printf 'User-agent: *\nDisallow: /\n' > out/robots.txt
+            echo "Serving at https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/"
+          fi
+
+          pages=$(find out -name index.html | wc -l)
+          echo "Publishing $pages pages, $(du -sh out | cut -f1) total"
+          [ "$pages" -ge 30 ] || { echo "::error::only $pages pages built"; exit 1; }
+
+      - name: Push to gh-pages
+        run: |
+          set -euo pipefail
+
+          cd out
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Publish ${GITHUB_SHA::7}"
+
+          # Single-commit force push: the branch is build output, so its history
+          # is noise and would grow the repository without limit.
+          git push -f \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" \
+            gh-pages
