@@ -9,4 +9,7 @@ npm-debug.log*
 .vercel
 next-env.d.ts
 tsconfig.tsbuildinfo
-out
+
+# Zipped copies of the export, for hand-uploading to a host. Build output, so
+# regenerable — `npm run build:static && cd out && zip -r ../site.zip .`
+*.zip
