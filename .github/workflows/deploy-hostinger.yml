@@ -11,12 +11,21 @@ name: Deploy to Hostinger
 #   CONTACT_ENDPOINT        external form handler URL; without it the contact
 #                           form reports that it is not configured
 #   FTP_SERVER_DIR          Remote path RELATIVE TO THE FTP ACCOUNT'S HOME.
-#                           Hostinger's main FTP account is already rooted at
-#                           public_html, so the default './' is correct there.
-#                           Only set this if your FTP user lands somewhere else
-#                           — pointing it at 'public_html/' when the account is
-#                           already inside public_html deploys to
-#                           public_html/public_html/ and the site appears dead.
+#                           The default './' is correct, and depends on the FTP
+#                           account being rooted at this site's own document
+#                           root: /home/u739945294/domains/cyberxsolutions.us/public_html
+#
+# READ THIS BEFORE CHANGING THE FTP ACCOUNT OR FTP_SERVER_DIR.
+#
+# This hosting plan carries ten domains. In the account home, `public_html` is a
+# SYMLINK to domains/mtechnet.net/public_html — a different, live site. Deploying
+# through it publishes this site at the wrong domain and overwrites that one's
+# index.html.
+#
+# So the FTP account used here must be a dedicated one whose directory is set to
+# domains/cyberxsolutions.us/public_html. The plan's shared main account
+# (u739945294, and its u739945294.<domain> aliases) lands at the account home and
+# must not be used. Never set FTP_SERVER_DIR to 'public_html/' on this account.
 
 on:
   push:

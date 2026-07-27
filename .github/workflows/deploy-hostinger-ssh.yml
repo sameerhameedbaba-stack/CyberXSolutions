@@ -15,8 +15,12 @@ name: Deploy to Hostinger (SSH)
 #
 # Optional variables:
 #   HOSTINGER_SSH_PORT  defaults to 65002 (Hostinger shared hosting)
-#   SSH_TARGET_DIR      defaults to public_html
+#   SSH_TARGET_DIR      defaults to the document root for cyberxsolutions.us
 #   CONTACT_ENDPOINT    external form handler URL
+#
+# DO NOT point the target at ~/public_html on this account. That path is a
+# symlink to domains/mtechnet.net/public_html — a different, live site sharing
+# the same hosting plan. rsync --delete through it would erase that site.
 #
 # Add the matching public key in hPanel → Advanced → SSH Access → SSH keys.
 
@@ -68,7 +72,9 @@ jobs:
           SSH_HOST: ${{ secrets.HOSTINGER_SSH_HOST }}
           SSH_USER: ${{ secrets.HOSTINGER_SSH_USER }}
           SSH_PORT: ${{ vars.HOSTINGER_SSH_PORT || '65002' }}
-          TARGET_DIR: ${{ vars.SSH_TARGET_DIR || 'public_html' }}
+          TARGET_DIR: ${{ vars.SSH_TARGET_DIR || 'domains/cyberxsolutions.us/public_html' }}
+          # Every path rsync is allowed to write to, after symlinks resolve.
+          ALLOWED_ROOT: /home/u739945294/domains/cyberxsolutions.us/public_html
         run: |
           set -euo pipefail
 
@@ -86,6 +92,16 @@ jobs:
           # instead of rsync helpfully creating it in the wrong place.
           $SSH_CMD "$SSH_USER@$SSH_HOST" "test -d $TARGET_DIR" \
             || { echo "::error::$TARGET_DIR does not exist on the server"; exit 1; }
+
+          # This account hosts ten domains and ~/public_html is a symlink into a
+          # different one. Resolve the target and refuse anything that is not this
+          # site's own docroot — rsync --delete gets no second chances.
+          resolved=$($SSH_CMD "$SSH_USER@$SSH_HOST" "readlink -f $TARGET_DIR")
+          if [ "$resolved" != "$ALLOWED_ROOT" ]; then
+            echo "::error::refusing to sync — $TARGET_DIR resolves to '$resolved', expected '$ALLOWED_ROOT'"
+            exit 1
+          fi
+          echo "Target verified: $TARGET_DIR -> $resolved"
 
           # Trailing slash on ./out/ syncs the contents, including dotfiles, so
           # .htaccess ships. --delete clears pages removed since the last deploy.

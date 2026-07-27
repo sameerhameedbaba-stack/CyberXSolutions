@@ -31,14 +31,29 @@ ships its own `.htaccess` redirect, so that is correct — do not go looking for
 This is expected and already accounted for: the site builds as a static export (plain HTML,
 CSS, JS) that needs no Node at runtime. Do not suggest switching plans.
 
-**FTP account** (already exists, do not create another):
+**The deploy target — read this before touching anything.**
+
+This plan carries **ten domains**, and cyberxsolutions.us is not the primary one. In the
+account home, `public_html` is a **symlink to `domains/mtechnet.net/public_html`** — a
+different, live site with a 25 KiB `index.html`. Deploying through it publishes this site at
+the wrong domain and overwrites that one.
+
+The real document root for this site is:
+
+```
+/home/u739945294/domains/cyberxsolutions.us/public_html
+```
+
+The plan's shared main FTP account (`u739945294`, and its `u739945294.<domain>` aliases)
+lands at the account home, where `public_html` is that symlink. **It must not be used for
+this deploy.** Use a dedicated FTP account whose Directory is set to the path above.
 
 | Field | Value |
 | --- | --- |
 | Host | `185.224.137.200` |
-| Username | `u739945294.cyberxsolutions.us` |
 | Port | `21` (explicit FTPS via AUTH TLS) |
-| Home directory | `public_html` |
+| Username | the dedicated account created for this deploy |
+| Directory | `/home/u739945294/domains/cyberxsolutions.us/public_html` |
 
 **SSH is also active** on this account: same IP, port `65002`, username `u739945294`. That is
 the fallback if FTPS fails — details at the end.
@@ -68,19 +83,18 @@ time, so confirm with me that I clicked it. Then reload the page and tell me how
 repository secrets are listed. It must be **three**. If it still says two, the form was
 abandoned and we go round again.
 
-## Step 2 — Confirm the deploy target is empty
+## Step 2 — Confirm the deploy target is the right folder
 
-hPanel → Files → File Manager → `public_html`.
+hPanel → Files → File Manager → `domains/cyberxsolutions.us/public_html`.
 
-Tell me every file and folder in there. Expect a single Hostinger placeholder,
-`default.php` (~16 KiB).
+Not `~/public_html`. That one belongs to mtechnet.net.
 
-**Do not delete anything.** Report the contents and I will delete it. The site pins
-`DirectoryIndex index.html index.htm` in its own `.htaccess`, so even if `default.php`
-survives, `index.html` wins — but a clean directory is still better.
+Tell me every file and folder in there. It should be **empty**. If it is not, stop and
+report the contents — do not delete anything.
 
-There is also a `DO_NOT_UPLOAD_HERE` marker one level up, outside `public_html`. That is
-Hostinger's own signpost. Leave it alone; nothing deploys to that level.
+There is a `DO_NOT_UPLOAD_HERE` marker one level up, in
+`domains/cyberxsolutions.us/`. That is Hostinger's own signpost. Leave it alone; nothing
+deploys to that level.
 
 ## Step 3 — Run the deploy
 
@@ -151,8 +165,10 @@ Two things remain that the deploy cannot do:
 
 ## Note on `FTP_SERVER_DIR`
 
-If you ever see a repository variable named `FTP_SERVER_DIR`, its value must be `./` — not
-`public_html/`. The FTP account is already rooted at `public_html`, so pointing it at
-`public_html/` deploys into `public_html/public_html/`: the workflow goes green and the site
-stays dead. The workflow defaults to `./` when the variable is absent, so leaving it unset is
-also correct.
+Leave it unset. The workflow defaults to `./`, which is correct **because the dedicated FTP
+account is rooted at this site's own document root**. If a variable named `FTP_SERVER_DIR`
+exists, its value must be `./`.
+
+Never set it to `public_html/` on this account. That is the mtechnet.net symlink, and it is
+also one level the deploy does not need to climb — the workflow would go green and the site
+would still be dead.
