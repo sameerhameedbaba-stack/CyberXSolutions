@@ -42,6 +42,17 @@ jobs:
     timeout-minutes: 20
 
     steps:
+      # Fail in seconds with a readable message rather than after a three-minute
+      # build with "Input required and not supplied: password".
+      - name: Check the FTP credentials exist
+        env:
+          FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+        run: |
+          if [ -z "${FTP_PASSWORD}" ]; then
+            echo "::error::HOSTINGER_FTP_PASSWORD is not set. Add it under Settings → Secrets and variables → Actions, then re-run this workflow. The GitHub Pages preview publishes without it."
+            exit 1
+          fi
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4

@@ -10,6 +10,10 @@
  */
 const isStatic = process.env.BUILD_TARGET === 'static';
 
+// GitHub Pages serves a project site from /<repo>/, so every asset and internal
+// link needs that prefix. Empty for a domain-root deploy, which is every other case.
+const basePath = process.env.BASE_PATH ?? '';
+
 const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -30,6 +34,8 @@ const nextConfig = {
     // so this costs nothing.
     unoptimized: isStatic,
   },
+
+  ...(basePath ? { basePath, assetPrefix: basePath } : {}),
 
   ...(isStatic
     ? {
